@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Symulator Mastery</title>
+
+<style>
+body { font-family: Arial; background:#111; color:#fff; }
+.stat { border:1px solid #333; padding:10px; margin:10px; }
+button { padding:5px 10px; margin-top:5px; }
+.disabled { opacity:0.4; pointer-events:none; }
+</style>
+
+</head>
+<body>
+
+<h2>Symulator Mistrzostwa</h2>
+
+<div>Punkty: <span id="points">0</span></div>
+<div>Pakiety: <span id="total">0</span></div>
+
+<div id="app"></div>
+
+<script>
+const req = {
+ Obrażenia:[4,9,14,19,24,29,34,39,44,49,54,59],
+ Redukcja:[2,7,11,16,20,25,30,34,39,43,48,53],
+ Odbicie:[1,5,10,14,19,23,27,32,36,41,45,49],
+ Celność:[0,3,6,9,12,15,18,21,24,27,30,33],
+ Obrona:[0,2,4,6,8,10,12,14,16,18,20,22]
+};
+
+const cost = {
+ Obrażenia:[150,300,600,1200,1800,3000,5000,7500,11000,15000,20000,40000],
+ Redukcja:[60,120,240,450,750,1250,2000,3000,4500,6000,7500,15000],
+ Odbicie:[40,80,150,300,500,800,1250,2000,3000,4000,5000,10000],
+ Celność:[30,60,100,200,400,650,1000,1500,2000,3000,4000,7500],
+ Obrona:[20,40,80,150,250,400,650,1000,1500,2000,2500,5000]
+};
+
+let levels = {
+ Obrażenia:0, Redukcja:0, Odbicie:0, Celność:0, Obrona:0
+};
+
+let points = 0;
+
+function total() {
+ return Object.values(levels).reduce((a,b)=>a+b,0);
+}
+
+function canBuy(stat){
+ let lvl = levels[stat];
+ if(lvl>=12) return false;
+ return total() >= req[stat][lvl];
+}
+
+function buy(stat){
+ if(!canBuy(stat)) return;
+
+ let lvl = levels[stat];
+ let costVal = cost[stat][lvl];
+
+ levels[stat]++;
+ points += costVal;
+
+ render();
+}
+
+function render(){
+
+document.getElementById("points").innerText = points;
+document.getElementById("total").innerText = total();
+
+let app = document.getElementById("app");
+app.innerHTML = "";
+
+for(let stat in levels){
+
+let lvl = levels[stat];
+let next = lvl;
+
+let div = document.createElement("div");
+div.className="stat";
+
+let reqNext = lvl<12 ? req[stat][lvl] : "MAX";
+let costNext = lvl<12 ? cost[stat][lvl] : "-";
+
+div.innerHTML = `
+<b>${stat}</b><br>
+Poziom: ${lvl}<br>
+Wymaga: ${reqNext}<br>
+Koszt: ${costNext}<br>
+<button onclick="buy('${stat}')" ${canBuy(stat) ? "" : "disabled"}>
+Ulepsz
+</button>
+`;
+
+app.appendChild(div);
+}
+
+}
+
+render();
+</script>
+
+</body>
+</html>
